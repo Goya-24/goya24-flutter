@@ -1,0 +1,57 @@
+name: Release
+
+# A tag `vX.Y.Z` becomes a GitHub release with the changelog entry as its
+# notes. Publishing to pub.dev is the second job, through pub.dev's own
+# GitHub Actions publishing (no token in this repository): switch it on in
+# the package's admin page on pub.dev once the package exists there.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: GitHub release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The tag must match pubspec.yaml
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(sed -n 's/^version: *//p' pubspec.yaml)"
+          if [ "$tag" != "$version" ]; then
+            echo "tag v$tag but pubspec.yaml says $version" >&2
+            exit 1
+          fi
+
+      - name: Release notes from the changelog
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            $0 ~ "^## " v "$" { on = 1; next }
+            on && /^## / { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "No changelog entry for $version" >&2
+            exit 1
+          fi
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "goya24_flutter ${GITHUB_REF_NAME#v}" \
+            --notes-file notes.md
+
+  publish:
+    name: pub.dev
+    if: vars.PUB_DEV_PUBLISH == 'true'
+    needs: release
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1

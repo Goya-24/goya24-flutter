@@ -1,0 +1,19 @@
+name: goya24_flutter_example
+description: A shop with one support button, opening the goya24 messenger.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  goya24_flutter:
+    path: ../
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

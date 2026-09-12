@@ -1,0 +1,29 @@
+name: Bug report
+description: Something does not do what the README says it does.
+labels: [bug]
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Package, Flutter and platform versions
+      placeholder: "goya24_flutter 0.1.0, Flutter 3.47, Android 15 / iOS 18"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The options you opened it with (no secrets), and what you pressed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened instead
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Anything from the console or the messenger's onError
+      render: text
